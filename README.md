@@ -14,7 +14,7 @@ To run, simply type:
 ```
 where
 - `protocol` is the neural network protocol you wish to run
-- `hidden_layer` is a list of integers, specifying the number of hidden layers (i.e. layers besides the input and output layers)
+- `hidden_layer` is a list of integers, specifying the number of nodes within each hidden layer (i.e. layers besides the input and output layers)
 - `epoch` is the number of times to repeat the training
 - During training, we break the training data into small batches and train on each of them in turn. `batch_size` is the size of these batches
 
