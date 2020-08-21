@@ -21,4 +21,4 @@ where
 The available neural network protocol which has been implemented at current are in the `network` folder. For details on each protocol, see [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com).
 
 ### Using your own protocol
-You can input your own protocol. Implement your protocol as a `Network` object, with `train` and `evaluate` functions, then place your `.py` file in the `network` folder. You can then call your protocol by passing the name (excluding the `.py` extension!) of your protocol into PyBann.
+You can input your own protocol. Implement your protocol as a `Network` object, with `train` and `evaluate` functions, then place your `.py` file in the `network` folder. You can then call your protocol by passing the name (excluding the `.py` extension!) of your protocol into PyBaNN.
