@@ -116,8 +116,8 @@ class Network:
 		n = len(inputs)
 
 		for i in range(epoch):
-			print("Epoch {}: training...".format(i), end="\r", flush=True)
 			# shuffling inputs, labels in unison
+			print("Epoch {}: shuffling dataset...".format(i), end="\r", flush=True)
 			unisonShuffle(inputs, labels)
 
 			for k in range(0, n, batchSize):

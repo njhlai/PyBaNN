@@ -22,3 +22,14 @@ The available neural network protocol which has been implemented at current are 
 
 ### Using your own protocol
 You can input your own protocol. Implement your protocol as a `Network` object, with `train` and `evaluate` functions, then place your `.py` file in the `network` folder. You can then call your protocol by passing the name (excluding the `.py` extension!) of your protocol into PyBaNN.
+
+## Neural Network Protocols
+The module for implemented protocols are kept in the `network` folder.
+
+### Protocols Implemented
+- Feedforward neural network
+
+## Datasets
+All datasets can be found in the `data` folder, and all have the same structure.
+- [Handwriting images](https://github.com/njhlai/homepage/blob/master/data/mnist.pkl.gz): This dataset is from the [MNIST database](http://yann.lecun.com/exdb/mnist/), adapted by Michael Nielson, the author of Neural Networks and Deep Learning. You can also get it directly [here](https://github.com/mnielsen/neural-networks-and-deep-learning).
+- [Fashion article images](https://github.com/njhlai/homepage/blob/master/data/fashion_mnist.pkl.gz): This dataset is from [Zalando's article images](https://github.com/zalandoresearch/fashion-mnist), adapted by me to have the same format.
