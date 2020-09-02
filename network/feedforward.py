@@ -3,26 +3,11 @@ from scipy.special import expit # more efficient calculation of sigmoid
 
 import helper.costfunctions as costfunctions
 
-# Misc. math functions
-def sigmoid(x):
-	"""sigmoid function"""
-	return 1 / (1 + numpy.exp(-x))
-
+# Misc. functions
 def sigmoid_prime(z):
 	"""derivative of sigmoid function, where z = sigmoid(x)"""
 	# doing this instead of using scipy.stats.logistic._pdf reduces the accuracy, for greater speed
 	return z * (1 - z)
-
-def vectoriseLabels(y):
-	"""convert labels into vector form, with 1 on the label-th position"""
-	M = numpy.zeros((len(y),10))
-	row = 0;
-
-	for i in y:
-		M[row, i] = 1.0
-		row += 1
-
-	return M
 
 def unisonShuffle(a,b):
 	"""shuffles two numpy arrays of the same length in unison"""
@@ -84,9 +69,8 @@ class Network:
 		ones = numpy.ones((len(inputs),1))
 
 		# initialise variables
-		# # delta^T, initialised with (output - label)
-		# # if using quadratic cost: delta_t *= sigmoid_prime(outputs[-1].transpose())
-		delta_t = self.cost.deltaInit(outputs[-1], vectoriseLabels(labels))
+		# # delta^T, initialised with (output - label) \odot modifier (see costfunctions.Cost class)
+		delta_t = self.cost.deltaInit(outputs[-1], labels).transpose()
 		# nabla
 		nabla = []
 

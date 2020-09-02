@@ -7,7 +7,19 @@ def sigmoid_prime(z):
 	return z * (1 - z)
 
 def dummy(z):
+	"""dummy function which does nothing"""
 	return 1
+
+def vectoriseLabels(y):
+	"""convert labels into vector form, with 1 on the label-th position"""
+	M = numpy.zeros((len(y),10))
+	row = 0;
+
+	for i in y:
+		M[row, i] = 1.0
+		row += 1
+
+	return M
 
 # cost functions
 def quadraticCost(x,y):
@@ -28,4 +40,4 @@ class Cost:
 
 	def deltaInit(self, predicted, actual):
 		"""returns initial delta appropriately according to cost function"""
-		return ((predicted - actual) * self.modifier(predicted)).transpose()
+		return (predicted - vectoriseLabels(actual)) * self.modifier(predicted)
