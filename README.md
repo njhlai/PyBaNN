@@ -6,6 +6,7 @@ Python-Based Neural Network (PyBaNN) is my attempt to implement several neural n
 ## Requirements
 - [Python 3](https://www.python.org)
 - [NumPy](https://numpy.org)
+- [SciPy](https://www.scipy.org)
 
 ## Usage
 To run, simply type:

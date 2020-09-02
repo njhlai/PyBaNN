@@ -1,4 +1,5 @@
 import numpy
+from scipy.special import expit # more efficient calculation of sigmoid
 
 # Misc. math functions
 def sigmoid(x):
@@ -7,6 +8,7 @@ def sigmoid(x):
 
 def sigmoid_prime(z):
 	"""derivative of sigmoid function, where z = sigmoid(x)"""
+	# doing this instead of using scipy.stats.logistic._pdf reduces the accuracy, for greater speed
 	return z * (1 - z)
 
 def vectoriseLabels(y):
@@ -37,7 +39,7 @@ def averageCost(x,y):
 	"""calculation of average cost via average mean square error"""
 	assert len(x) == len(y)
 	n = len(x)
-	return 1 / (2 * n) * (x - y)^2
+	return 1 / (2 * n) * (x - y)**2
 
 # Network class
 class Network:
@@ -69,7 +71,7 @@ class Network:
 			currentActivation = currentActivation.dot(M)
 
 			# sigmoid and sigmoid' calculation
-			outputs += [sigmoid(currentActivation)]
+			outputs += [expit(currentActivation)]
 			derivatives_t += [sigmoid_prime(outputs[-1]).transpose()]
 
 		return derivatives_t, outputs
@@ -104,6 +106,8 @@ class Network:
 
 	def updateWeights(self, inputs, labels):
 		"""updates the weights of the network by gradient descent"""
+		assert len(inputs) == len(labels)
+
 		nabla = self.backpropagation(inputs, labels)
 		n = len(inputs)
 
@@ -119,9 +123,12 @@ class Network:
 			# shuffling inputs, labels in unison
 			print("Epoch {}: shuffling dataset...".format(i), end="\r", flush=True)
 			unisonShuffle(inputs, labels)
+			beg = 0
 
-			for k in range(0, n, batchSize):
-				self.updateWeights(inputs[k:k + batchSize], labels[k:k + batchSize])
-				print("Epoch {}: trained {} entries".format(i, k), end="\r", flush=True)
+			for k in range(0, n // batchSize):
+				end = beg + batchSize
+				self.updateWeights(inputs[beg:end], labels[beg:end])
+				beg = end
+				print("Epoch {}: trained {} entries".format(i, end), end="\r", flush=True)
 
 			print("Epoch {}: [DONE]                ".format(i))
