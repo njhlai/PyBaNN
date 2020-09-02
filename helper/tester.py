@@ -4,7 +4,7 @@ import numpy
 def test(network, testData):
 	"""tests network with testData"""
 	testInputs, testLabels = testData
-	_, testOutputs = network.evaluate(testInputs)
+	testOutputs = network.evaluate(testInputs)
 
 	# converts outputs into labels: the index with the highest value is the label
 	outputLabels = numpy.argmax(testOutputs[-1], axis=1)

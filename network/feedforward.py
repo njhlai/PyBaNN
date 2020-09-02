@@ -1,6 +1,8 @@
 import numpy
 from scipy.special import expit # more efficient calculation of sigmoid
 
+import helper.costfunctions as costfunctions
+
 # Misc. math functions
 def sigmoid(x):
 	"""sigmoid function"""
@@ -35,31 +37,30 @@ def unisonShuffle(a,b):
 	# shuffle b with the same permutation (determined by random state)
 	numpy.random.shuffle(b)
 
-def averageCost(x,y):
-	"""calculation of average cost via average mean square error"""
-	assert len(x) == len(y)
-	n = len(x)
-	return 1 / (2 * n) * (x - y)**2
-
 # Network class
 class Network:
 	"""class for Feedforward Neural Network implementation"""
 
-	def __init__(self, sizes):
-		"""initialise weights and biases for the feedforward neural network"""
+	def __init__(self, sizes, cost='crossEntropyCost'):
+		"""initialise weights and biases for the feedforward neural network, along with specified cost"""
 		assert sizes[0] == 784 # assert that the first layer has 784 = 28x28 nodes, one for each pixel
 		assert sizes[-1] == 10 # assert that the last layer has 10 nodes, one for each digit
 
 		self.layerNum = len(sizes)
 		self.weights = [numpy.random.randn(input_dim+1, output_dim) for output_dim,input_dim in zip(sizes[1:], sizes[:-1])]
+		self.cost = costfunctions.Cost(getattr(costfunctions, cost))
+
+	def averageCost(self, x, y):
+		n = len(x)
+		assert n == len(y)
+
+		return self.cost.eval(x, y) / n
 
 	def evaluate(self, inputs):
 		"""evaluation of multilayer (continuous) perceptron network"""
 
 		# output of each layer
 		outputs = [inputs]
-		# activation of each layer
-		derivatives_t = []
 		# column vector of 1s
 		ones = numpy.ones((len(inputs), 1))
 
@@ -70,51 +71,47 @@ class Network:
 			# dot product
 			currentActivation = currentActivation.dot(M)
 
-			# sigmoid and sigmoid' calculation
+			# sigmoid calculation
 			outputs += [expit(currentActivation)]
-			derivatives_t += [sigmoid_prime(outputs[-1]).transpose()]
 
-		return derivatives_t, outputs
+		return outputs
 
 	def backpropagation(self, inputs, labels):
 		"""backpropogation algorithm, returning the gradient of the cost function"""
-		derivatives_t, outputs = self.evaluate(inputs)
+		outputs = self.evaluate(inputs)
 
 		# row vector of 1s
 		ones = numpy.ones((len(inputs),1))
 
 		# initialise variables
-		# delta^T, initialised with (output - label)
-		delta_t = (outputs[-1] - vectoriseLabels(labels)).transpose()
-		# multiplier at each step to delta^T, initialised with identity matrix
-		multiplier = numpy.identity(10) # it will be the matrix of weights from the next layer
+		# # delta^T, initialised with (output - label)
+		# # if using quadratic cost: delta_t *= sigmoid_prime(outputs[-1].transpose())
+		delta_t = self.cost.deltaInit(outputs[-1], vectoriseLabels(labels))
 		# nabla
 		nabla = []
 
 		# iterating backwards
-		for i in range(1, self.layerNum):
-			# delta^T = (weights * [previous delta]) \odot sigmoid'^T
-			delta_t = multiplier.dot(delta_t) * derivatives_t[-i]
-
+		for i in range(2, self.layerNum+1):
 			# nabla = (delta^T * [previous layer outputs])^T
-			nabla = [delta_t.dot(numpy.concatenate((outputs[-i-1], ones), axis=1)).transpose()] + nabla
+			nabla = [delta_t.dot(numpy.concatenate((outputs[-i], ones), axis=1)).transpose()] + nabla
 
-			# next multiplier is the weights of the current matrix, excluding biases
-			multiplier = self.weights[-i][:-1]
+			# [next delta]^T = 
+			# ([next layer weights excluding biases] * [current delta]^T) \odot sigmoid_prime([current layer outputs])^T
+			delta_t = self.weights[-i+1][:-1].dot(delta_t) * sigmoid_prime(outputs[-i].transpose())
 
 		return nabla 
 
-	def updateWeights(self, inputs, labels):
+	def updateWeights(self, inputs, labels, learningRate):
 		"""updates the weights of the network by gradient descent"""
 		assert len(inputs) == len(labels)
 
 		nabla = self.backpropagation(inputs, labels)
 		n = len(inputs)
 
-		# new weight = old weight - \frac{nabla}{n}
-		self.weights = [W - 1/n * V for W,V in zip(self.weights, nabla)]
+		# new weight = old weight - \frac{learningRate}{n} nabla
+		self.weights = [W - (learningRate  * V) / n for W,V in zip(self.weights, nabla)]
 
-	def train(self, trainingData, epoch, batchSize):
+	def train(self, trainingData, epoch, batchSize, learningRate):
 		"""trains the network via stochastic gradient descent, repeated 'epoch' amount of time, with 'trainingData' broken into batches of size 'batchSize'"""
 		inputs, labels = trainingData
 		n = len(inputs)
@@ -127,7 +124,7 @@ class Network:
 
 			for k in range(0, n // batchSize):
 				end = beg + batchSize
-				self.updateWeights(inputs[beg:end], labels[beg:end])
+				self.updateWeights(inputs[beg:end], labels[beg:end], learningRate)
 				beg = end
 				print("Epoch {}: trained {} entries".format(i, end), end="\r", flush=True)
 
