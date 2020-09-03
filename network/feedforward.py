@@ -1,13 +1,17 @@
 import numpy
 from scipy.special import expit # more efficient calculation of sigmoid
 
-import helper.costfunctions as costfunctions
+# from helper import costfunctions
 
 # Misc. functions
 def sigmoid_prime(z):
 	"""derivative of sigmoid function, where z = sigmoid(x)"""
 	# doing this instead of using scipy.stats.logistic._pdf reduces the accuracy, for greater speed
 	return z * (1 - z)
+
+def regularisationCost(w):
+	"""calculation of L2 regularisation"""
+	return (w**2).sum() / 2
 
 def unisonShuffle(a,b):
 	"""shuffles two numpy arrays of the same length in unison"""
@@ -33,18 +37,23 @@ class Network:
 
 		self.layerNum = len(sizes)
 		self.weights = [numpy.random.randn(input_dim+1, output_dim) for output_dim,input_dim in zip(sizes[1:], sizes[:-1])]
-		self.cost = costfunctions.Cost(getattr(costfunctions, cost))
+		self.cost = cost
 
-	def averageCost(self, x, y):
+	def averageCost(self, x, y, regularisation=0):
 		"""calculation of average cost"""
 		n = len(x)
 		assert n == len(y)
 
-		return self.cost.eval(x, y) / n
+		# calculate regularisation cost
+		regularisationCost = 0
+		if regularisation:
+			for w in self.weights:
+				regularisationCost = regularisation * L2Regularisation(w)
+
+		return (self.cost.eval(x, y) + regularisationCost) / n
 
 	def evaluate(self, inputs):
 		"""evaluation of multilayer (continuous) perceptron network"""
-
 		# output of each layer
 		outputs = [inputs]
 		# column vector of 1s
@@ -86,17 +95,22 @@ class Network:
 
 		return nabla 
 
-	def updateWeights(self, inputs, labels, learningRate):
+	def updateWeights(self, inputs, labels, total, learningRate=1, regularisation=0):
 		"""updates the weights of the network by gradient descent"""
 		assert len(inputs) == len(labels)
-
-		nabla = self.backpropagation(inputs, labels)
 		n = len(inputs)
 
-		# new weight = old weight - \frac{learningRate}{n} nabla
-		self.weights = [W - (learningRate  * V) / n for W,V in zip(self.weights, nabla)]
+		# backpropagate
+		nabla = self.backpropagation(inputs, labels)
 
-	def train(self, trainingData, epoch, batchSize, learningRate):
+		# calculated new weight
+		for W,V in zip(self.weights, nabla):
+			# biases are ignored when tweaking according to regularisation
+			if regularisation: W[:-1,:] *= 1 - ((learningRate * regularisation) / total)
+			# new weight = regularised old weight - \frac{learningRate}{n} nabla
+			W -= (learningRate  * V) / n
+
+	def train(self, trainingData, epoch, batchSize, learningRate=1, regularisation=0):
 		"""trains the network via stochastic gradient descent, repeated 'epoch' amount of time, with 'trainingData' broken into batches of size 'batchSize'"""
 		inputs, labels = trainingData
 		n = len(inputs)
@@ -109,8 +123,8 @@ class Network:
 
 			for k in range(0, n // batchSize):
 				end = beg + batchSize
-				self.updateWeights(inputs[beg:end], labels[beg:end], learningRate)
+				self.updateWeights(inputs[beg:end], labels[beg:end], n, learningRate, regularisation)
 				beg = end
 				print("Epoch {}: trained {} entries".format(i, end), end="\r", flush=True)
 
-			print("Epoch {}: [DONE]                ".format(i))
+			print("Epoch {}: [DONE]                ".format(i), end="\r", flush=True)

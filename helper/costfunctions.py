@@ -36,8 +36,8 @@ class Cost:
 	def __init__(self, method):
 		"""initialise method to specify cost function"""
 		self.eval = method
-		self.modifier = sigmoid_prime if method == QuadraticCost else dummy
+		self.deltaModifier = sigmoid_prime if method == QuadraticCost else dummy
 
 	def deltaInit(self, predicted, actual):
 		"""returns initial delta appropriately according to cost function"""
-		return (predicted - vectoriseLabels(actual)) * self.modifier(predicted)
+		return (predicted - vectoriseLabels(actual)) * self.deltaModifier(predicted)
