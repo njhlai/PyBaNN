@@ -26,7 +26,7 @@ def unisonShuffle(a,b):
 class Network:
 	"""class for Feedforward Neural Network implementation"""
 
-	def __init__(self, sizes, cost='crossEntropyCost'):
+	def __init__(self, sizes, cost):
 		"""initialise weights and biases for the feedforward neural network, along with specified cost"""
 		assert sizes[0] == 784 # assert that the first layer has 784 = 28x28 nodes, one for each pixel
 		assert sizes[-1] == 10 # assert that the last layer has 10 nodes, one for each digit
@@ -36,6 +36,7 @@ class Network:
 		self.cost = costfunctions.Cost(getattr(costfunctions, cost))
 
 	def averageCost(self, x, y):
+		"""calculation of average cost"""
 		n = len(x)
 		assert n == len(y)
 
@@ -66,22 +67,22 @@ class Network:
 		outputs = self.evaluate(inputs)
 
 		# row vector of 1s
-		ones = numpy.ones((len(inputs),1))
+		ones = numpy.ones((1,len(inputs)))
 
 		# initialise variables
-		# # delta^T, initialised with (output - label) \odot modifier (see costfunctions.Cost class)
-		delta_t = self.cost.deltaInit(outputs[-1], labels).transpose()
+		# # delta, initialised with (output - label) \odot modifier (see costfunctions.Cost class)
+		delta = self.cost.deltaInit(outputs[-1], labels)
 		# nabla
 		nabla = []
 
 		# iterating backwards
-		for i in range(2, self.layerNum+1):
-			# nabla = (delta^T * [previous layer outputs])^T
-			nabla = [delta_t.dot(numpy.concatenate((outputs[-i], ones), axis=1)).transpose()] + nabla
+		for i in range(1, self.layerNum):
+			# nabla = [previous layer outputs]^T * delta
+			nabla = [numpy.concatenate((outputs[-i-1].transpose(), ones), axis=0).dot(delta)] + nabla
 
-			# [next delta]^T = 
-			# ([next layer weights excluding biases] * [current delta]^T) \odot sigmoid_prime([current layer outputs])^T
-			delta_t = self.weights[-i+1][:-1].dot(delta_t) * sigmoid_prime(outputs[-i].transpose())
+			# [previous layer delta] = 
+			# ([current layer delta] * [current layer weights excluding biases]^T) \odot [previous layer sigmoid_prime]
+			delta = delta.dot(self.weights[-i][:-1].transpose()) * sigmoid_prime(outputs[-i-1])
 
 		return nabla 
 

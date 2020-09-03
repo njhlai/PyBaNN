@@ -22,12 +22,12 @@ def vectoriseLabels(y):
 	return M
 
 # cost functions
-def quadraticCost(x,y):
-	"""calculation of average quadratic cost"""
+def QuadraticCost(x,y):
+	"""calculation of quadratic cost"""
 	return ((y - x)**2).sum() / 2
 
-def crossEntropyCost(x, y):
-	"""calculation of average cross-entropy cost"""
+def CrossEntropyCost(x, y):
+	"""calculation of cross-entropy cost"""
 	return (y * numpy.log(x) + (1 - y) * numpy.log(1 - x)).sum()
 
 # Cost class
@@ -36,7 +36,7 @@ class Cost:
 	def __init__(self, method):
 		"""initialise method to specify cost function"""
 		self.eval = method
-		self.modifier = sigmoid_prime if method == quadraticCost else dummy
+		self.modifier = sigmoid_prime if method == QuadraticCost else dummy
 
 	def deltaInit(self, predicted, actual):
 		"""returns initial delta appropriately according to cost function"""
