@@ -30,13 +30,21 @@ def unisonShuffle(a,b):
 class Network:
 	"""class for Feedforward Neural Network implementation"""
 
-	def __init__(self, sizes, cost):
+	def __init__(self, sizes, cost, smallWeightInit=True):
 		"""initialise weights and biases for the feedforward neural network, along with specified cost"""
 		assert sizes[0] == 784 # assert that the first layer has 784 = 28x28 nodes, one for each pixel
 		assert sizes[-1] == 10 # assert that the last layer has 10 nodes, one for each digit
 
+		# record number of layers
 		self.layerNum = len(sizes)
+
+		# initialise weights and biases
 		self.weights = [numpy.random.randn(input_dim+1, output_dim) for output_dim,input_dim in zip(sizes[1:], sizes[:-1])]
+		# if using small weights, modify weights
+		if smallWeightInit: 
+			for W in self.weights: W[:-1,:] *= 1 / numpy.sqrt(len(W)-1) 
+
+		# record cost function
 		self.cost = cost
 
 	def averageCost(self, x, y, regularisation=0):
@@ -48,7 +56,7 @@ class Network:
 		regularisationCost = 0
 		if regularisation:
 			for w in self.weights:
-				regularisationCost = regularisation * L2Regularisation(w)
+				regularisationCost += regularisation * regularisationCost(w)
 
 		return (self.cost.eval(x, y) + regularisationCost) / n
 

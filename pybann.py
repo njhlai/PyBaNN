@@ -9,7 +9,7 @@ def main(protocol, networkLayers, epochs, batchSize, learningRate=1, regularisat
 	# clean name of cost function
 	costMethod = ''.join(x.capitalize() for x in cost.split('-'))  + 'Cost'
 	if costMethod not in dir(costfunctions):
-		print("WARNING: {} cost function not implemented! Reverting to cross-entropy cost.".format(cost))
+		print("WARNING: {} cost not implemented! Reverting to cross-entropy cost.".format(cost))
 		cost='cross-entropy'
 		costMethod ='CrossEntropyCost'
 	# initialise network
