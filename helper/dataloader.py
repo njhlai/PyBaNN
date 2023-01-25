@@ -11,7 +11,7 @@ def load(path='data/mnist.pkl.gz'):
 	with gzip.open(path, 'rb') as f:
 		training, validation, test = pickle.load(f, encoding='latin1')
 
-	# each data variable is a tuple (M, l), where 
+	# each data variable is a tuple (M, l), where
 	# 	M is matrix where each row vector is an array of pixel inputs
 	# 	l is an array of labels
 

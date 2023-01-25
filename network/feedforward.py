@@ -41,8 +41,8 @@ class Network:
 		# initialise weights and biases
 		self.weights = [numpy.random.randn(input_dim+1, output_dim) for output_dim,input_dim in zip(sizes[1:], sizes[:-1])]
 		# if using small weights, modify weights
-		if smallWeightInit: 
-			for W in self.weights: W[:-1,:] *= 1 / numpy.sqrt(len(W)-1) 
+		if smallWeightInit:
+			for W in self.weights: W[:-1,:] *= 1 / numpy.sqrt(len(W)-1)
 
 		# record cost function
 		self.cost = cost
@@ -97,11 +97,11 @@ class Network:
 			# nabla = [previous layer outputs]^T * delta
 			nabla = [numpy.concatenate((outputs[-i-1].transpose(), ones), axis=0).dot(delta)] + nabla
 
-			# [previous layer delta] = 
+			# [previous layer delta] =
 			# ([current layer delta] * [current layer weights excluding biases]^T) \odot [previous layer sigmoid_prime]
 			delta = delta.dot(self.weights[-i][:-1].transpose()) * sigmoid_prime(outputs[-i-1])
 
-		return nabla 
+		return nabla
 
 	def updateWeights(self, inputs, labels, total, learningRate=1, regularisation=0):
 		"""updates the weights of the network by gradient descent"""
