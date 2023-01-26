@@ -10,8 +10,8 @@ Python-Based Neural Network (PyBaNN) is my attempt to implement several neural n
 
 ## Usage
 To run, simply type:
-```shell-script
-    > python3 pybann.py protocol hidden_layer epoch batch_size
+```sh
+python3 pybann.py protocol hidden_layer epoch batch_size
 ```
 where
 - `protocol` is the neural network protocol you wish to run
